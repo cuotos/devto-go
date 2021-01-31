@@ -53,57 +53,57 @@ type CreateArticle struct {
 // GetUsersArticles returns a slice of Articles for the authenticated user.
 //
 // API reference: https://docs.dev.to/api/#operation/getUserArticles
-func (a *API) GetUsersArticles() ([]Article, error) {
+func (c *Client) GetUsersArticles() ([]Article, *Response, error) {
 
 	uri := "/articles/me/all"
 
-	resp, err := a.makeRequest(http.MethodGet, a.BaseURL+uri, nil)
+	body, resp, err := c.makeRequest(http.MethodGet, c.BaseURL+uri, nil)
 	if err != nil {
-		return []Article{}, err
+		return []Article{}, resp, err
 	}
 
 	articles := []Article{}
-	err = json.Unmarshal(resp, &articles)
+	err = json.Unmarshal(body, &articles)
 	if err != nil {
-		return []Article{}, err
+		return []Article{}, resp, err
 	}
 
-	return articles, nil
+	return articles, resp, nil
 }
 
 // GetUserArticleByID returns a single article
 //
 // As no api exists to get a single unpublished article, this gets all of the users articles and filters the required one
-func (a *API) GetUserArticleByID(id int) (Article, bool, error) {
-	articles, err := a.GetUsersArticles()
+func (c *Client) GetUserArticleByID(id int) (Article, bool, *Response, error) {
+	articles, resp, err := c.GetUsersArticles()
 	if err != nil {
-		return Article{}, false, err
+		return Article{}, false, resp, err
 	}
 
 	for _, a := range articles {
 		if a.ID == id {
-			return a, true, nil
+			return a, true, resp, nil
 		}
 	}
 
-	return Article{}, false, nil
+	return Article{}, false, resp, nil
 }
 
 //CreateArticle creates an article for the currently authenticated user
 //
 //API reference: https://docs.dev.to/api/#operation/createArticle
-func (a *API) CreateArticle(article CreateArticle) (Article, error) {
-	return a.upsert(nil, article)
+func (c *Client) CreateArticle(article CreateArticle) (Article, *Response, error) {
+	return c.upsert(nil, article)
 }
 
 //UpdateArticle updates an existing article owned by the currently authenticated user
 //
 //API Reference: https://docs.dev.to/api/#operation/updateArticle
-func (a *API) UpdateArticle(id int, article CreateArticle) (Article, error) {
-	return a.upsert(&id, article)
+func (c *Client) UpdateArticle(id int, article CreateArticle) (Article, *Response, error) {
+	return c.upsert(&id, article)
 }
 
-func (a *API) upsert(id *int, article CreateArticle) (Article, error) {
+func (c *Client) upsert(id *int, article CreateArticle) (Article, *Response, error) {
 	var uri string
 	var method string
 
@@ -125,20 +125,20 @@ func (a *API) upsert(id *int, article CreateArticle) (Article, error) {
 
 	articleBytes, err := json.Marshal(createArticleRequest)
 	if err != nil {
-		return Article{}, fmt.Errorf("unable to marshal article: %w", err)
+		return Article{}, nil, fmt.Errorf("unable to marshal article: %w", err)
 	}
 
-	resp, err := a.makeRequest(method, a.BaseURL+uri, bytes.NewBuffer(articleBytes))
+	body, resp, err := c.makeRequest(method, c.BaseURL+uri, bytes.NewBuffer(articleBytes))
 	if err != nil {
-		return Article{}, fmt.Errorf("error from CreateArticle: HTTP Status %v: %v", err.(Error).Status, err.Error())
+		return Article{}, resp, fmt.Errorf("error from CreateArticle: HTTP Status %v: %v", err.(Error).Status, err.Error())
 	}
 
 	createArticleResponse := Article{}
 
-	err = json.Unmarshal(resp, &createArticleResponse)
+	err = json.Unmarshal(body, &createArticleResponse)
 	if err != nil {
-		return Article{}, fmt.Errorf("unable to unmarshal the create article response object: %w", err)
+		return Article{}, resp, fmt.Errorf("unable to unmarshal the create article response object: %w", err)
 	}
 
-	return createArticleResponse, nil
+	return createArticleResponse, resp, nil
 }

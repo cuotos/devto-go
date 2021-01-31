@@ -1,9 +1,10 @@
 package devto
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUser(t *testing.T) {
@@ -42,7 +43,7 @@ func TestUser(t *testing.T) {
 		ProfileImage:    "profile_url.jpeg",
 	}
 
-	user, err := client.GetCurrentUser()
+	user, _, err := client.GetCurrentUser()
 	if assert.NoError(t, err) {
 		assert.Equal(t, expectedUser, user)
 	}

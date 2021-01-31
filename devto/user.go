@@ -23,20 +23,20 @@ type User struct {
 // GetCurrentUser returns the currently authenticated User.
 //
 // API reference: https://docs.dev.to/api/#operation/getUserMe
-func (a *API) GetCurrentUser() (User, error) {
+func (c *Client) GetCurrentUser() (User, *Response, error) {
 
 	uri := "/users/me"
 
-	resp, err := a.makeRequest(http.MethodGet, a.BaseURL+uri, nil)
+	body, resp, err := c.makeRequest(http.MethodGet, c.BaseURL+uri, nil)
 	if err != nil {
-		return User{}, err
+		return User{}, resp, err
 	}
 
 	user := User{}
-	err = json.Unmarshal(resp, &user)
+	err = json.Unmarshal(body, &user)
 	if err != nil {
-		return User{}, fmt.Errorf("unable to unmarshall response: %w", err)
+		return User{}, resp, fmt.Errorf("unable to unmarshall response: %w", err)
 	}
 
-	return user, nil
+	return user, resp, nil
 }

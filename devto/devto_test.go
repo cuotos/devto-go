@@ -17,7 +17,7 @@ var (
 	mux *http.ServeMux
 
 	// client is the API client being tested
-	client *API
+	client *Client
 
 	// server is a test HTTP server used to provide mock API responses
 	server *httptest.Server
@@ -80,7 +80,8 @@ func TestApiErrors(t *testing.T) {
 }`))
 	})
 
-	_, err := client.CreateArticle(CreateArticle{})
+	_, resp, err := client.CreateArticle(CreateArticle{})
 
+	assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
 	assert.EqualError(t, err, "error from CreateArticle: HTTP Status 422: this is the error message")
 }

@@ -2,25 +2,25 @@ package devto
 
 import "net/http"
 
-type Option func(*API) error
+type Option func(*Client) error
 
 func WithAPIURL(url string) Option {
-	return func(api *API) error {
-		api.BaseURL = url
+	return func(client *Client) error {
+		client.BaseURL = url
 		return nil
 	}
 }
 
 func WithHeader(header http.Header) Option {
-	return func(api *API) error {
-		api.headers = header
+	return func(client *Client) error {
+		client.headers = header
 		return nil
 	}
 }
 
-func (a *API) parseOptions(opts ...Option) error {
+func (c *Client) parseOptions(opts ...Option) error {
 	for _, option := range opts {
-		err := option(a)
+		err := option(c)
 		if err != nil {
 			return err
 		}

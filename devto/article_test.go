@@ -35,7 +35,7 @@ func TestGetAllUsersArticles(t *testing.T) {
 		Published:   true,
 	}}
 
-	articles, err := client.GetUsersArticles()
+	articles, _, err := client.GetUsersArticles()
 	if assert.NoError(t, err) {
 		assert.Equal(t, expectedArticles, articles)
 	}
@@ -70,7 +70,7 @@ func TestCanGetASingleArticle(t *testing.T) {
 		Published: true,
 	}
 
-	article, found, err := client.GetUserArticleByID(12345)
+	article, found, _, err := client.GetUserArticleByID(12345)
 	if assert.NoError(t, err) {
 		if assert.True(t, found, "article not found, but it should have been") {
 			assert.Equal(t, expectedArticle, article)
@@ -108,7 +108,7 @@ func TestCreateArticle(t *testing.T) {
 		Title:     "Test Title",
 		Published: false,
 	}
-	createdArticle, err := client.CreateArticle(testArticle)
+	createdArticle, _, err := client.CreateArticle(testArticle)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, 98765, createdArticle.ID)
@@ -136,7 +136,7 @@ func TestCreateArticleThatAlreadyExists(t *testing.T) {
 		Title:     "Test Title",
 		Published: false,
 	}
-	_, err := client.CreateArticle(testArticle)
+	_, _, err := client.CreateArticle(testArticle)
 
 	assert.True(t, called)
 
@@ -173,7 +173,7 @@ func TestUpdateArticle(t *testing.T) {
 		Published: false,
 	}
 
-	_, err := client.UpdateArticle(123, testArticle)
+	_, _, err := client.UpdateArticle(123, testArticle)
 
 	assert.True(t, called)
 
